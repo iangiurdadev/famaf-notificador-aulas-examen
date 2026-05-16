@@ -55,14 +55,19 @@ def descargar(session,url_img):
     return data, ext
 
 
-def guardar(nombre, data):
-    carpeta = "imagenes_aulas"
-    os.makedirs(carpeta, exist_ok=True)
 
-    ruta = os.path.join(carpeta, nombre)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CARPETA = os.path.join(BASE_DIR, "data", "imagenes")
+
+def guardar(nombre, data):
+    os.makedirs(CARPETA, exist_ok=True)
+
+    ruta = os.path.join(CARPETA, nombre)
 
     with open(ruta, "wb") as f:
         f.write(data)
+
+        
 
 def get_html(session,url, timeout=10):
     try:
