@@ -56,18 +56,18 @@ def descargar(session,url_img):
 
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CARPETA = os.path.join(BASE_DIR, "data", "imagenes")
 
 def guardar(nombre, data):
     os.makedirs(CARPETA, exist_ok=True)
-
     ruta = os.path.join(CARPETA, nombre)
+    print(f"Guardando en {ruta}")
 
     with open(ruta, "wb") as f:
         f.write(data)
 
-        
+
 
 def get_html(session,url, timeout=10):
     try:
