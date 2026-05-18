@@ -4,7 +4,8 @@ from urllib.parse import urljoin
 import unicodedata
 import os
 from requests.exceptions import RequestException, Timeout, HTTPError
-
+import re
+from datetime import datetime
 
 URL = "https://web.archive.org/web/20251209132303/https://famaf.unc.edu.ar/la-facultad/institucional/areas-y-departamentos/%C3%A1rea-direcci%C3%B3n-de-ense%C3%B1anza/despacho-de-Estudiantes-informa/"
 
@@ -13,8 +14,40 @@ DIAS = [
     "jueves","viernes","sabado","sábado","domingo",
 ]
 
+MESES = {
+    "enero": 1,
+    "febrero": 2,
+    "marzo": 3,
+    "abril": 4,
+    "mayo": 5,
+    "junio": 6,
+    "julio": 7,
+    "agosto": 8,
+    "septiembre": 9,
+    "setiembre": 9,
+    "octubre": 10,
+    "noviembre": 11,
+    "diciembre": 12,
+}
 
 # ---------- utils ----------
+
+def extraer_id_examen(texto_original, anio=2026):
+    texto = normalizar(texto_original)
+
+    match = re.search(r"(\d{1,2}) de ([a-z]+)", texto)
+    if not match:
+        return None
+
+    dia = int(match.group(1))
+    mes_txt = match.group(2).lower()
+
+    mes = MESES.get(mes_txt)
+    if not mes:
+        return None
+
+    return f"{dia:02d}-{mes:02d}-{anio}"
+
 def normalizar(texto):
     texto = texto.lower()
     return ''.join(
@@ -111,6 +144,10 @@ def consultar_fechas_disponibles():
             print("No se encontró día, se ignora")
             continue
 
+        id_examen = extraer_id_examen(texto_original)
+        if not id_examen:
+            continue
+
         img_rel = obtener_imagen(h2)
         if not img_rel:
             print("No se encontró imagen asociada")
@@ -127,6 +164,7 @@ def consultar_fechas_disponibles():
 
 
         resultados.append({
+            "id": id_examen,
             "dia": dia,
             "ruta": ruta
         })
