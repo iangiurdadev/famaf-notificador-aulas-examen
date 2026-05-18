@@ -67,6 +67,7 @@ def guardar(nombre, data):
     with open(ruta, "wb") as f:
         f.write(data)
 
+    return ruta
 
 
 def get_html(session,url, timeout=10):
@@ -87,45 +88,55 @@ def get_html(session,url, timeout=10):
 
 # ---------- main ----------
 
-session = requests.Session()
-soup = get_html(session,URL)
+def consultar_fechas_disponibles():
+    session = requests.Session()
+    soup = get_html(session,URL)
 
-coincidencias = 0
-guardadas = 0
+    resultados = []
+    coincidencias = 0
+    guardadas = 0
 
-for h2 in soup.find_all("h2", class_="title"):
-    texto_original = h2.get_text(strip=True)
-    texto = normalizar(texto_original)
+    for h2 in soup.find_all("h2", class_="title"):
+        texto_original = h2.get_text(strip=True)
+        texto = normalizar(texto_original)
 
-    if not es_match(texto):
-        continue
+        if not es_match(texto):
+            continue
 
-    print(f"\nMatch encontrado: {texto_original}")
-    coincidencias += 1
+        print(f"\nMatch encontrado: {texto_original}")
+        coincidencias += 1
 
-    dia = extraer_dia(texto)
-    if not dia:
-        print("No se encontró día, se ignora")
-        continue
+        dia = extraer_dia(texto)
+        if not dia:
+            print("No se encontró día, se ignora")
+            continue
 
-    img_rel = obtener_imagen(h2)
-    if not img_rel:
-        print("No se encontró imagen asociada")
-        continue
+        img_rel = obtener_imagen(h2)
+        if not img_rel:
+            print("No se encontró imagen asociada")
+            continue
 
-    img_url = urljoin(URL, img_rel)
-    print("Descargando:", img_url)
+        img_url = urljoin(URL, img_rel)
+        print("Descargando:", img_url)
 
-    data, ext = descargar(session,img_url)
+        data, ext = descargar(session,img_url)
 
-    nombre = f"aula-final-{dia}{ext}"
-    guardar(nombre, data)
-    guardadas+=1
+        nombre = f"aula-final-{dia}{ext}"
+        ruta = guardar(nombre, data)
+        guardadas+=1
 
-    print("Guardada como", nombre)
 
-if coincidencias == 0:
-    print("No se encontraron aulas de examen")
-else:
-    print(f"Coincidencias: {coincidencias}")
-    print(f"Imágenes guardadas: {guardadas}")
+        resultados.append({
+            "dia": dia,
+            "ruta": ruta
+        })
+
+        print("Guardada como", nombre)
+
+    if coincidencias == 0:
+        print("No se encontraron aulas de examen")
+    else:
+        print(f"Coincidencias: {coincidencias}")
+        print(f"Imágenes guardadas: {guardadas}")
+
+    return resultados
