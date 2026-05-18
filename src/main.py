@@ -30,13 +30,15 @@ def main():
 
         destinatarios = interesados.get(dia, [])
 
-        for destinatario in destinatarios:
-            enviar_email(CORREO_REMITENTE,
-                        CONTRASENA,
-                        destinatario,
-                        f"Aulas Examen {id_examen}",
-                        "Adjunto la imagen de las aulas :D",
-                        ruta_adjunto)
+        if not destinatarios:
+            continue
+
+        enviar_email(CORREO_REMITENTE,
+                    CONTRASENA,
+                    destinatarios,
+                    f"Aulas Examen {id_examen}",
+                    "Adjunto la imagen de las aulas :D",
+                    ruta_adjunto)
 
         notificadas.add(id_examen)
 

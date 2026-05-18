@@ -10,13 +10,13 @@ from scraper import consultar_fechas_disponibles
 load_dotenv()
 
 def enviar_email(remitente, contrasena,
-                 destinatario, asunto,
+                 destinatarios, asunto,
                  contenido, ruta_archivo):
 
     mensaje = EmailMessage()
 
     mensaje["From"] = remitente
-    mensaje["To"] = destinatario
+    mensaje["To"] = ", ".join(destinatarios)
     mensaje["Subject"] = asunto
 
     mensaje.set_content(contenido)
@@ -42,7 +42,7 @@ def enviar_email(remitente, contrasena,
 
         server.quit()
 
-        print("Correo enviado exitosamente")
+        print(f"Enviando a {len(destinatarios)} destinatarios")
 
     except Exception as e:
         print(f"Error al enviar correo: {e}")
