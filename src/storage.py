@@ -3,3 +3,10 @@ def cargar_estado():
 
 def guardar_estado(notificados):
     pass
+
+def cargar_interesados():
+    return {
+        "martes": [
+            "iangiurda.dev@gmail.com"
+        ]
+    }
