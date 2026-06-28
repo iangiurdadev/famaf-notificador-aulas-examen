@@ -7,7 +7,7 @@ from requests.exceptions import RequestException, Timeout, HTTPError
 import re
 from datetime import datetime
 
-URL = "https://web.archive.org/web/20251209132303/https://famaf.unc.edu.ar/la-facultad/institucional/areas-y-departamentos/%C3%A1rea-direcci%C3%B3n-de-ense%C3%B1anza/despacho-de-Estudiantes-informa/"
+URL = "https://www.famaf.unc.edu.ar/la-facultad/institucional/areas-y-departamentos/%C3%A1rea-direcci%C3%B3n-de-ense%C3%B1anza/despacho-de-Estudiantes-informa/"
 
 DIAS = [
     "lunes","martes","miercoles","miércoles",
@@ -57,7 +57,7 @@ def normalizar(texto):
 
 
 def es_match(texto):
-    return "aula" in texto and "examen" in texto
+    return "examen" in texto
 
 
 def extraer_dia(texto):
@@ -121,60 +121,65 @@ def get_html(session,url, timeout=10):
 
 # ---------- main ----------
 
+def procesar_examen(session, texto_original, img_rel, resultados):
+    texto = normalizar(texto_original)
+
+    if not es_match(texto):
+        return False
+
+    print(f"\nMatch encontrado: {texto_original}")
+
+    dia = extraer_dia(texto)
+    if not dia:
+        print("No se encontró día, se ignora")
+        return False
+
+    id_examen = extraer_id_examen(texto_original)
+    if not id_examen:
+        print("No se pudo extraer id, se ignora")
+        return False
+
+    img_url = urljoin(URL, img_rel)
+    print("Descargando:", img_url)
+
+    data, ext = descargar(session, img_url)
+
+    nombre = f"aula-final-{dia}{ext}"
+    ruta = guardar(nombre, data)
+
+    resultados.append({
+        "id": id_examen,
+        "dia": dia,
+        "ruta": ruta
+    })
+
+    print("Guardada como", nombre)
+    return True
+
 def consultar_fechas_disponibles():
     session = requests.Session()
-    soup = get_html(session,URL)
+    soup = get_html(session, URL)
 
     resultados = []
-    coincidencias = 0
-    guardadas = 0
 
-    for h2 in soup.find_all("h2", class_="title"):
-        texto_original = h2.get_text(strip=True)
-        texto = normalizar(texto_original)
+    # Estrategia 1: información en el título
+    for encabezado in soup.find_all(["h2", "h3", "h4"]):
+        texto = encabezado.get_text(strip=True)
+        img = obtener_imagen(encabezado)
 
-        if not es_match(texto):
-            continue
+        if img:
+            procesar_examen(session, texto, img, resultados)
 
-        print(f"\nMatch encontrado: {texto_original}")
-        coincidencias += 1
+    # Si no se encontró nada, probar la otra representación
+    if resultados:
+        return resultados
 
-        dia = extraer_dia(texto)
-        if not dia:
-            print("No se encontró día, se ignora")
-            continue
+    # Estrategia 2: información en el alt de la imagen
+    for img in soup.find_all("img"):
+        texto = img.get("alt", "").strip()
+        src = img.get("src")
 
-        id_examen = extraer_id_examen(texto_original)
-        if not id_examen:
-            continue
-
-        img_rel = obtener_imagen(h2)
-        if not img_rel:
-            print("No se encontró imagen asociada")
-            continue
-
-        img_url = urljoin(URL, img_rel)
-        print("Descargando:", img_url)
-
-        data, ext = descargar(session,img_url)
-
-        nombre = f"aula-final-{dia}{ext}"
-        ruta = guardar(nombre, data)
-        guardadas+=1
-
-
-        resultados.append({
-            "id": id_examen,
-            "dia": dia,
-            "ruta": ruta
-        })
-
-        print("Guardada como", nombre)
-
-    if coincidencias == 0:
-        print("No se encontraron aulas de examen")
-    else:
-        print(f"Coincidencias: {coincidencias}")
-        print(f"Imágenes guardadas: {guardadas}")
+        if src:
+            procesar_examen(session, texto, src, resultados)
 
     return resultados
