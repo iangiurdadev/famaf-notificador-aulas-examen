@@ -1,19 +1,21 @@
 import json
-import os
+from pathlib import Path
 
-FECHAS_NOTIFICADAS = "notificadas.json"
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+NOTIFICADAS_PATH = BASE_DIR / "state" / "notificadas.json"
 
 
 def cargar_estado():
-    if not os.path.exists(FECHAS_NOTIFICADAS):
-        print(f"no existe el archivo {FECHAS_NOTIFICADAS}")
+    if not NOTIFICADAS_PATH.exists():
+        print(f"No existe el archivo {NOTIFICADAS_PATH}")
         return set()
 
-    with open(FECHAS_NOTIFICADAS, "r", encoding="utf-8") as archivo:
+    with NOTIFICADAS_PATH.open("r", encoding="utf-8") as archivo:
         return set(json.load(archivo))
 
 def guardar_estado(notificados):
-    with open(FECHAS_NOTIFICADAS, "w", encoding="utf-8") as archivo:
+    with NOTIFICADAS_PATH.open("w", encoding="utf-8") as archivo:
         json.dump(list(notificados), archivo)
 
 def cargar_interesados():
