@@ -18,7 +18,7 @@ def guardar_estado(notificados):
 
 def cargar_interesados():
     return {
-        "lunes": [
+        "29-06-2026": [
             "iangiurda.dev@gmail.com"
         ]
     }

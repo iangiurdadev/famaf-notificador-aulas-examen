@@ -28,7 +28,7 @@ def main():
         if id_examen in notificadas:
             continue
 
-        destinatarios = interesados.get(dia, [])
+        destinatarios = interesados.get(id_examen, [])
 
         if not destinatarios:
             continue
