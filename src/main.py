@@ -39,8 +39,6 @@ def main():
         print(f"id_examen: {id_examen}")
         print(f"dia: {dia}")
 
-        if id_examen in notificadas:
-            continue
 
         destinatarios = interesados.get(id_examen, [])
         print(interesados)
@@ -57,9 +55,9 @@ def main():
                     "Adjunto la imagen de las aulas :D",
                     ruta_adjunto)
 
-        notificadas.add(id_examen)
 
-    guardar_estado(notificadas)
+        gs.marcar_notificados(id_examen)
+
 
 if __name__ == "__main__":
     main()

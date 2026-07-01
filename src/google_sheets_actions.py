@@ -8,6 +8,7 @@ CREDENTIALS = BASE_DIR / "credentials" / "service_account.json"
 
 COLUMNA_FECHA = "¿En qué fecha rendís?"
 COLUMNA_CORREO = "Correo electronico"
+COLUMNA_NOTIFICADO = "¿Ya fue notificado?"
 
 MAX_REGISTROS = 100
 
@@ -41,6 +42,12 @@ class GoogleSheets:
         interesados = {}
 
         for registro in registros:
+
+            estado = registro.get(COLUMNA_NOTIFICADO, "").strip()
+
+            if estado == "Sí":
+                continue
+
             fecha = registro[COLUMNA_FECHA].replace("/", "-")
             correo = registro[COLUMNA_CORREO]
 
@@ -51,7 +58,17 @@ class GoogleSheets:
 
         return interesados
 
+    def marcar_notificados(self, fecha):
+        registros = self.obtener_registros()
 
+        encabezados = self.sheet.row_values(1)
+        self.columna_notificado = encabezados.index(COLUMNA_NOTIFICADO) + 1
+
+        for fila, registro in enumerate(registros, start=2):
+            fecha_registro = registro[COLUMNA_FECHA].replace("/", "-")
+
+            if fecha_registro == fecha:
+                self.sheet.update_cell(fila, self.columna_notificado, "Sí")
 
 
 if __name__ == "__main__":
