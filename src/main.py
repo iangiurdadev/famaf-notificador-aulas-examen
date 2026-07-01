@@ -43,6 +43,9 @@ def main():
             continue
 
         destinatarios = interesados.get(id_examen, [])
+        print(interesados)
+        print(f"Destinararios para {id_examen}")
+        print(destinatarios)
 
         if not destinatarios:
             continue

@@ -30,7 +30,7 @@ class GoogleSheets:
         interesados = {}
 
         for registro in registros:
-            fecha = registro[COLUMNA_FECHA]
+            fecha = registro[COLUMNA_FECHA].replace("/", "-")
             correo = registro[COLUMNA_CORREO]
 
             if fecha not in interesados:
