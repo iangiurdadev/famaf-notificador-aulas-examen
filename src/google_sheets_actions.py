@@ -9,6 +9,8 @@ CREDENTIALS = BASE_DIR / "credentials" / "service_account.json"
 COLUMNA_FECHA = "¿En qué fecha rendís?"
 COLUMNA_CORREO = "Correo electronico"
 
+MAX_REGISTROS = 100
+
 
 class GoogleSheets:
     def __init__(self, credentials_file, spreadsheet_name, worksheet_name):
@@ -22,7 +24,16 @@ class GoogleSheets:
         print(df)
 
     def obtener_registros(self):
-        return self.sheet.get_all_records()
+        registros = self.sheet.get_all_records()
+
+
+        if len(registros) > MAX_REGISTROS:
+            raise RuntimeError(
+                f"Se excedió el límite de {MAX_REGISTROS} respuestas "
+                f"({len(registros)} encontradas)."
+            )
+
+        return registros
 
     def obtener_interesados(self):
         registros = self.obtener_registros()
