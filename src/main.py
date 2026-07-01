@@ -1,10 +1,17 @@
 from scraper import consultar_fechas_disponibles
-from storage import cargar_estado, guardar_estado, cargar_interesados
+from storage import cargar_estado, guardar_estado
 from notifier import enviar_email
+from google_sheets_actions import GoogleSheets
 from dotenv import load_dotenv
 
+from pathlib import Path
 import os
+
 load_dotenv()
+
+BASE_DIR = Path(__file__).resolve().parent
+CREDENTIALS = BASE_DIR / "credentials" / "service_account.json"
+
 
 def main():
 
@@ -13,7 +20,14 @@ def main():
 
     fechas = consultar_fechas_disponibles()
     notificadas = cargar_estado()
-    interesados = cargar_interesados()
+
+    gs = GoogleSheets(
+        str(CREDENTIALS),
+        "Formulario Prueba (Respuestas)",
+        "Hoja 1"
+    )
+
+    interesados = gs.obtener_interesados()
 
 
     for fecha in fechas:

@@ -1,5 +1,15 @@
+# Entornos
 .venv/
 venv/
+
+# Python
 __pycache__/
-data/imagenes/
+*.py[cod]
+
+# Configuración
 .env
+src/credentials/
+
+# Datos generados
+data/imagenes/
+state/
